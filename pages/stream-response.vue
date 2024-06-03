@@ -1,10 +1,14 @@
 <template>
   <div>
+    Stream
     <div>
-      <NuxtLink to="/invoke-response">Invoke response</NuxtLink> |
-      <NuxtLink to="/stream-response">Stream response</NuxtLink>
+      {{ answer }}
     </div>
-    <NuxtPage />
+    <div v-if="loading">Chargement...</div>
+    <input style="width: 512px" v-model="question" placeholder="Ask a question here" />
+    <button @click="getAnswer()">
+      Get answer
+    </button>
   </div>
 </template>
 

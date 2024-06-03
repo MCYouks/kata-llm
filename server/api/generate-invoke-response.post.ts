@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
   console.log("Hola hola")
 
-  const stream = await chain.stream({ question });
+  const response = await chain.invoke({ question });
 
-  return sendStream(event, stream);
+  return response
 });
