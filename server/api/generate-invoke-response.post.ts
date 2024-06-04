@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   });
 
   /**
-   * TODO: update prompt
+   * TODO: tweak the prompt
    * TODO: use `ChatPromptTemplate.fromMessages` method
    * TODO: use `dedent` for multi-lining the prompt
    */
