@@ -1,11 +1,11 @@
 <template>
   <div>
     Stream
-    <div>
+    <div style="white-space: break-spaces;">
       {{ answer }}
     </div>
     <div v-if="loading">Chargement...</div>
-    <input style="width: 512px" v-model="question" placeholder="Ask a question here" />
+    <input style="width: 512px" v-model="ingredients" placeholder="List ingredients here" />
     <button @click="getAnswer()">
       Get answer
     </button>
@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { resolveStream } from "~/utils/chat-stream";
 
-const question = ref("Quel est le concept de la relativité?")
+const ingredients = ref("Courgettes, aubergines, tomates")
 const answer = ref("")
 const loading = ref(false)
 
@@ -29,7 +29,7 @@ const getAnswer = async function () {
      */
     const { body: stream } = await fetch("/api/generate-stream-response", { 
       method: "POST", 
-      body: JSON.stringify({ question: question.value }) 
+      body: JSON.stringify({ ingredients: ingredients.value }) 
     });
 
     if (!stream) throw new Error("No stream returned!");

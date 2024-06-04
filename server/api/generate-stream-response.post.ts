@@ -7,7 +7,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { z } from "zod"
 
 const bodySchema = z.object({
-  question: z.string().describe("The question to be answered")
+  ingredients: z.string().describe("The ingredients to be listed")
 })
 
 export type Body = z.infer<typeof bodySchema>;
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  const { question } = bodySchema.parse(JSON.parse(body))
+  const { ingredients } = bodySchema.parse(JSON.parse(body))
 
   /**
    * TODO: implement `temperature` and `modelName`
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
    * TODO: use `ChatPromptTemplate.fromMessages` method
    * TODO: use `dedent` for multi-lining the prompt
    */
-  const prompt = ChatPromptTemplate.fromTemplate("Répondez à la question avec une simplicité exceptionnelle comme si j'avais 12 ans. \n\nQuestion: {question}");
+  const prompt = ChatPromptTemplate.fromTemplate("Je vais te donner une liste d'ingrédients. Propose moi 3 recettes à partir de ces ingrédients PRINCIPALEMENT, mais aussi avec d'autres si besoin, que tu me listeras à la fin de la recette (type liste de course). \n\nIngrédients: {ingredients}");
 
   /**
    * TODO: Change String parser to a Structured output parser — https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
   const chain = prompt.pipe(llm).pipe(parser);
 
-  const stream = await chain.stream({ question });
+  const stream = await chain.stream({ ingredients });
 
   return sendStream(event, stream);
 });
