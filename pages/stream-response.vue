@@ -14,15 +14,16 @@
 
 <script setup lang="ts">
 import { resolveStream } from "~/utils/chat-stream";
+import { applyPatch } from 'fast-json-patch';
 
 const question = ref("Quel est le concept de la relativité?")
-const answer = ref("")
+const answer = ref({})
 const loading = ref(false)
 
 const getAnswer = async function () {
   try {
     loading.value = true;
-    answer.value = "";
+    answer.value = {};
 
     /**
      * Note: we are using the native `fetch` API to handle readable streams.
@@ -34,9 +35,28 @@ const getAnswer = async function () {
 
     if (!stream) throw new Error("No stream returned!");
 
+    let buffer = '';
+
     resolveStream(stream, {
-      onChunk: (content) => {
-        answer.value += content;
+      onChunk: (chunk) => {
+        buffer += chunk;
+        let start = buffer.indexOf('[');
+        let end = buffer.lastIndexOf(']');
+
+        if (start >= 0 && end >= 0) {
+          const jsonStr = '[' + buffer.substring(start, end + 1).replace(/\]\s*\[/g, '],[') + ']';
+          buffer = buffer.substring(end + 1);
+
+          try {
+            const patches = JSON.parse(jsonStr);
+            patches.forEach((patch: any) => {
+              console.log({ patch}, typeof patch)
+              answer.value = applyPatch(answer.value, patch).newDocument;
+            });
+          } catch (error) {
+            console.error('Failed to parse JSON:', error);
+          }
+        }
       },
     });
   } catch (error) {
