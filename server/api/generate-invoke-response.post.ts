@@ -1,6 +1,6 @@
-import { PromptTemplate } from "@langchain/core/prompts";
-import { OpenAI } from "@langchain/openai";
-import dedent from "dedent";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatOpenAI } from "@langchain/openai";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 
 import { z } from "zod"
 
@@ -20,25 +20,26 @@ export default defineEventHandler(async (event) => {
   /**
    * TODO: implement `temperature` and `modelName`
    */
-  const llm = new OpenAI({
+  const llm = new ChatOpenAI({
     openAIApiKey: config.OPENAI_KEY,
     temperature: 0.8,
     modelName: "gpt-4-turbo"
     
   });
 
-  const prompt = PromptTemplate.fromTemplate(
-    dedent`Répondez à la question avec une simplicité exceptionnelle comme si j'avais 12 ans.
+  /**
+   * TODO: update prompt
+   * TODO: use `ChatPromptTemplate.fromMessages` method
+   * TODO: use `dedent` for multi-lining the prompt
+   */
+  const prompt = ChatPromptTemplate.fromTemplate("Répondez à la question avec une simplicité exceptionnelle comme si j'avais 12 ans. \n\nQuestion: {question}");
 
-    Question: {question}
-  `
-  );
+  /**
+   * TODO: Change String parser to a Structured output parser — https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
+   */
+  const parser = new StringOutputParser()
 
-  console.log("Bonjour les papillons")
-
-  const chain = prompt.pipe(llm);
-
-  console.log("Hola hola")
+  const chain = prompt.pipe(llm).pipe(parser);
 
   const response = await chain.invoke({ question });
 
