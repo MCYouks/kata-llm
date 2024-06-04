@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { resolveStream } from "~/utils/chat-stream";
 
-const question = ref("What is the concept of relativity?")
+const question = ref("Quel est le concept de la relativité?")
 const answer = ref("")
 const loading = ref(false)
 
