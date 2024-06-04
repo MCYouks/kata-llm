@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  const { question } = bodySchema.parse(JSON.parse(body))
+  const { question } = bodySchema.parse(body)
 
   /**
    * TODO: implement `temperature` and `modelName`

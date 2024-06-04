@@ -1,10 +1,14 @@
 <template>
   <div>
+    Stream
     <div>
-      <NuxtLink class="tab-link" to="/invoke-response">Invoke response</NuxtLink> |
-      <NuxtLink class="tab-link" to="/stream-response">Stream response</NuxtLink>
+      {{ answer }}
     </div>
-    <NuxtPage />
+    <div v-if="loading">Chargement...</div>
+    <input style="width: 512px" v-model="question" placeholder="Ask a question here" />
+    <button @click="getAnswer()">
+      Get answer
+    </button>
   </div>
 </template>
 
@@ -41,13 +45,3 @@ const getAnswer = async function () {
   }
 }
 </script>
-
-<style scoped lang="scss">
-.tab-link {
-  color: darkcyan;
-
-  &.router-link-active {
-    color: blue
-  }
-}
-</style>
