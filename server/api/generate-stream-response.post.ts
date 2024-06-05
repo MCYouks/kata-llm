@@ -1,48 +1,21 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { StructuredOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod"
 
-const inputSchema = z.object({
-  ingredients: z.string().describe("The list of ingredients in the fridge")
-})
-
-export type Input = z.infer<typeof inputSchema>;
-
-/**
- * TODO: Change String parser to a Structured output parser — https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
- */
-const outputSchema = z.object({
-  recipes: z.array(
-    z.object({
-      name: z.string(),
-      ingredients: z.array(
-        z.object({
-          name: z.string(),
-          quantity: z.number(),
-          unit: z.string(),
-        })
-      ),
-      ingredients_missing_in_the_fridge: z.array(
-        z.object({
-          name: z.string(),
-          quantity: z.number(),
-          unit: z.string(),
-        })
-      ),
-      steps: z.array(z.string()),
-    })
-  ),
-})
-
-export type Output = z.infer<typeof outputSchema>;
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
 
   const body = await readBody(event)
+
+  const inputSchema = z.object({
+    ingredients: z.string().describe("The list of ingredients in the fridge")
+  })
+  
+  
 
   const { ingredients } = inputSchema.parse(JSON.parse(body))
 
@@ -51,6 +24,29 @@ export default defineEventHandler(async (event) => {
    * TODO: use `dedent` for multi-lining the prompt
    */
   const prompt = ChatPromptTemplate.fromTemplate("Je vais te donner une liste d'ingrédients. Propose moi 3 recettes à partir de ces ingrédients PRINCIPALEMENT, mais aussi avec d'autres si besoin, que tu me listeras à la fin de la recette (type liste de course). \n\nIngrédients: {ingredients}");
+
+  const outputSchema = z.object({
+    recipes: z.array(
+      z.object({
+        name: z.string(),
+        ingredients: z.array(
+          z.object({
+            name: z.string(),
+            quantity: z.number(),
+            unit: z.string(),
+          })
+        ),
+        ingredients_missing_in_the_fridge: z.array(
+          z.object({
+            name: z.string(),
+            quantity: z.number(),
+            unit: z.string(),
+          })
+        ),
+        steps: z.array(z.string()),
+      })
+    ),
+  })
 
   const modelParams = {
     functions: [
