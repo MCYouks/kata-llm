@@ -11,10 +11,30 @@ const inputSchema = z.object({
 
 export type Input = z.infer<typeof inputSchema>;
 
-const outputSchema = z.object({ 
-  answer: z.string(), 
-  sources: z.array(z.string()).describe('List of sources, must be websites'), 
-  confidence_level: z.number().min(0).max(1) 
+/**
+ * TODO: Change String parser to a Structured output parser — https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
+ */
+const outputSchema = z.object({
+  recipes: z.array(
+    z.object({
+      name: z.string(),
+      ingredients: z.array(
+        z.object({
+          name: z.string(),
+          quantity: z.number(),
+          unit: z.string(),
+        })
+      ),
+      ingredients_missing_in_the_fridge: z.array(
+        z.object({
+          name: z.string(),
+          quantity: z.number(),
+          unit: z.string(),
+        })
+      ),
+      steps: z.array(z.string()),
+    })
+  ),
 })
 
 export type Output = z.infer<typeof outputSchema>;
@@ -55,8 +75,6 @@ export default defineEventHandler(async (event) => {
   /**
    * TODO: Change String parser to a Structured output parser — https://js.langchain.com/v0.1/docs/modules/model_io/output_parsers/types/structured/
    */
-
-  const parser = StructuredOutputParser.fromZodSchema(outputSchema)
 
   const chain = prompt.pipe(llm).pipe(new JsonOutputFunctionsParser({ diff: true }));
 
