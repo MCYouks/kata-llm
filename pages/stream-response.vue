@@ -35,27 +35,21 @@ const getAnswer = async function () {
 
     if (!stream) throw new Error("No stream returned!");
 
-    let buffer = '';
-
     resolveStream(stream, {
       onChunk: (chunk) => {
-        buffer += chunk;
-        let start = buffer.indexOf('[');
-        let end = buffer.lastIndexOf(']');
+        // Split the chunk by replacing '][' with '],[', and wrap into an array to get individual JSON arrays
+        const splitChunks = '[' + chunk.replace(/\]\s*\[/g, '],[') + ']';
 
-        if (start >= 0 && end >= 0) {
-          const jsonStr = '[' + buffer.substring(start, end + 1).replace(/\]\s*\[/g, '],[') + ']';
-          buffer = buffer.substring(end + 1);
+        try {
+          // Parse the JSON string into an array of patches
+          const patches = JSON.parse(splitChunks);
 
-          try {
-            const patches = JSON.parse(jsonStr);
-            patches.forEach((patch: any) => {
-              console.log({ patch}, typeof patch)
-              answer.value = applyPatch(answer.value, patch).newDocument;
-            });
-          } catch (error) {
-            console.error('Failed to parse JSON:', error);
-          }
+          // Apply each patch to the answer
+          patches.forEach((patch: any) => {
+            answer.value = applyPatch(answer.value, patch).newDocument;
+          });
+        } catch (error) {
+          console.error('Failed to parse JSON:', error, { splitChunks });
         }
       },
     });
