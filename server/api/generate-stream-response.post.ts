@@ -15,8 +15,6 @@ export default defineEventHandler(async (event) => {
     ingredients: z.string().describe("The list of ingredients in the fridge")
   })
   
-  
-
   const { ingredients } = inputSchema.parse(JSON.parse(body))
 
   /**

@@ -7,16 +7,15 @@ import {
 
 import { z } from "zod";
 
-const bodySchema = z.object({
-  ingredients: z.string().describe("The ingredients to be listed"),
-});
-
-export type Body = z.infer<typeof bodySchema>;
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
 
   const body = await readBody(event);
+
+  const bodySchema = z.object({
+    ingredients: z.string().describe("The ingredients to be listed"),
+  });
 
   const { ingredients } = bodySchema.parse(body);
 
