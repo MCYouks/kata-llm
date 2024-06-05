@@ -1,3 +1,5 @@
+import { applyPatch } from 'fast-json-patch';
+
 type ResolveStreamParams = {
   onStart?: () => void;
   onChunk?: (data: string) => void;
@@ -37,3 +39,24 @@ export const resolveStream = async function (stream: ReadableStream, params?: Re
     onError(error);
   }
 };
+
+export const resolveJSONPatch = function<T extends object> (document:T, chunk: string) {
+  let newDocument = document
+
+  // Split the chunk by replacing '][' with '],[', and wrap into an array to get individual JSON arrays
+  const splitChunks = '[' + chunk.replace(/\]\s*\[/g, '],[') + ']';
+
+  try {
+    // Parse the JSON string into an array of patches
+    const patches = JSON.parse(splitChunks);
+
+    // Apply each patch to the answer
+    patches.forEach((patch: any) => {
+      newDocument = applyPatch(newDocument, patch).newDocument;
+    });
+
+    return newDocument
+  } catch (error) {
+    console.error('Failed to parse JSON:', error, { splitChunks });
+  }
+}
