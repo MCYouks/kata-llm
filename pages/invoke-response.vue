@@ -1,11 +1,11 @@
 <template>
   <div>
     Invoke
-    <div>
+    <div style="white-space: break-spaces;">
       {{ answer }}
     </div>
     <div v-if="loading">Chargement...</div>
-    <input style="width: 512px" v-model="question" placeholder="Ask a question here" />
+    <input style="width: 512px" v-model="ingredients" placeholder="List ingredients here" />
     <button @click="getAnswer()">
       Get answer
     </button>
@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-const question = ref("What is the concept of relativity?")
+const ingredients = ref("Salade, tomate, oignon")
 const answer = ref("")
 const loading = ref(false)
 
@@ -27,7 +27,7 @@ const getAnswer = async function () {
      */
     const response = await $fetch("/api/generate-invoke-response", { 
       method: "POST", 
-      body: { question: question.value }
+      body: { ingredients: ingredients.value }
     });
 
     if (!response) throw new Error("No response returned!");

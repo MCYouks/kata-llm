@@ -6,7 +6,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod"
 
 const inputSchema = z.object({
-  question: z.string().describe("The question to be answered")
+  ingredients: z.string().describe("The list of ingredients in the fridge")
 })
 
 export type Input = z.infer<typeof inputSchema>;
@@ -24,14 +24,13 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  const { question } = inputSchema.parse(JSON.parse(body))
+  const { ingredients } = inputSchema.parse(JSON.parse(body))
 
   /**
-   * TODO: tweak the prompt
    * TODO: use `ChatPromptTemplate.fromMessages` method
    * TODO: use `dedent` for multi-lining the prompt
    */
-  const prompt = ChatPromptTemplate.fromTemplate("Répondez à la question avec une simplicité exceptionnelle comme si j'avais 12 ans.\n\nQuestion: {question}");
+  const prompt = ChatPromptTemplate.fromTemplate("Je vais te donner une liste d'ingrédients. Propose moi 3 recettes à partir de ces ingrédients PRINCIPALEMENT, mais aussi avec d'autres si besoin, que tu me listeras à la fin de la recette (type liste de course). \n\nIngrédients: {ingredients}");
 
   const modelParams = {
     functions: [
@@ -61,7 +60,7 @@ export default defineEventHandler(async (event) => {
 
   const chain = prompt.pipe(llm).pipe(new JsonOutputFunctionsParser({ diff: true }));
 
-  const stream = await chain.stream({ question });
+  const stream = await chain.stream({ ingredients });
 
   const encodedStream = stream.pipeThrough(new TransformStream({
     transform(chunk, controller) {
