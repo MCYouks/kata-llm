@@ -82,7 +82,6 @@ export default defineEventHandler(async (event) => {
 
   const encodedStream = stream.pipeThrough(new TransformStream({
     transform(chunk, controller) {
-      console.log({ chunk })
       controller.enqueue(new TextEncoder().encode(JSON.stringify(chunk)));
     }
   }));
