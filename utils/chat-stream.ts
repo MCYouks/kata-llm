@@ -40,6 +40,12 @@ export const resolveStream = async function (stream: ReadableStream, params?: Re
   }
 };
 
+/**
+ * This function is used to handle and process incoming chunks of data from a server-side stream.
+ * Each chunk is a JSON string representing an array of JSON patches. These patches are used to incrementally update a document.
+ * The function first splits the chunk into individual patches. This is necessary because sometimes multiple patches can be sent together as a single chunk.
+ * After splitting, each patch is applied to the document, and the updated document is returned.
+ */
 export const resolveJSONPatch = function<T extends object> (document:T, chunk: string) {
   let newDocument = document
 
@@ -50,7 +56,7 @@ export const resolveJSONPatch = function<T extends object> (document:T, chunk: s
     // Parse the JSON string into an array of patches
     const patches = JSON.parse(splitChunks);
 
-    // Apply each patch to the answer
+    // Apply each patch to the new document
     patches.forEach((patch: any) => {
       newDocument = applyPatch(newDocument, patch).newDocument;
     });
